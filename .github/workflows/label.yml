@@ -1,0 +1,243 @@
+# This workflow will triage pull requests and apply a label based on the
+# paths that are modified in the pull request.
+# To use this workflow, you will need to set up a .github/labeler.yml
+# file with configuration.  For more information, see:
+# https://github.com/actions/labeler
+name: Labeler
+on: [pull_request_target]
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+    - uses: actions/labeler@v4
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}" && 
+from urllib.parse import urlparse
+import validators
+
+def is_valid_url(url):
+    try:
+        # Check if URL is valid
+        if not validators.url(url):
+            return False
+        
+        # Parse URL and check scheme
+        parsed = urlparse(url)
+        return parsed.scheme in ['http', 'https']
+    except:
+        return False
+
+class WebCrawler:
+    def search_for_ais(self, url, depth=0):
+        if not is_valid_url(url):
+            logging.warning(f"Invalid URL skipped: {url}")
+            return
+        # ... rest of the method
+Request Headers and User Agent
+Python
+class WebCrawler:
+    def __init__(self, start_urls, max_threads=5, rate_limit=1, proxies=None, max_depth=2):
+        # ... existing init code ...
+        self.headers = {
+            'User-Agent': 'Friendly-Bot/1.0 (your@email.com)',
+            'Accept': 'text/html,application/xhtml+xml',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'DNT': '1',
+        }
+Rate Limiting and Robots.txt Compliance
+Python
+from urllib.robotparser import RobotFileParser
+
+class WebCrawler:
+    def __init__(self, start_urls, max_threads=5, rate_limit=1, proxies=None, max_depth=2):
+        # ... existing init code ...
+        self.robots_cache = {}
+        
+    def check_robots_txt(self, url):
+        parsed_url = urlparse(url)
+        robots_url = f"{parsed_url.scheme}://{parsed_url.netloc}/robots.txt"
+        
+        if robots_url not in self.robots_cache:
+            rp = RobotFileParser()
+            rp.set_url(robots_url)
+            try:
+                rp.read()
+                self.robots_cache[robots_url] = rp
+            except:
+                return True
+        
+        return self.robots_cache[robots_url].can_fetch(self.headers['User-Agent'], url)
+
+    def search_for_ais(self, url, depth=0):
+        if not self.check_robots_txt(url):
+            logging.warning(f"URL not allowed by robots.txt: {url}")
+            return
+Secure File Operations
+Python
+class AI_Entity:
+    def log_recruitment(self):
+        recruitment_details = self.__dict__.copy()
+        log_file = "recruited_ais.json"
+        
+        try:
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(log_file), exist_ok=True)
+            
+            # Secure file permissions
+            with open(log_file, "a") as file:
+                json.dump(recruitment_details, file, indent=4)
+                file.write(",\n")
+            
+            # Set file permissions (UNIX-like systems)
+            os.chmod(log_file, 0o600)
+        except Exception as e:
+            logging.error(f"Error logging recruitment: {e}")
+Request Error Handling and Timeouts
+Python
+class WebCrawler:
+    def search_for_ais(self, url, depth=0):
+        # ... existing validation code ...
+        
+        try:
+            response = requests.get(
+                url,
+                proxies=self.proxies,
+                timeout=10,
+                headers=self.headers,
+                verify=True,  # Verify SSL certificates
+                allow_redirects=True,
+                stream=True   # Stream large responses
+            )
+            
+            # Check content type before processing
+            if 'text/html' not in response.headers.get('Content-Type', '').lower():
+                logging.warning(f"Skipping non-HTML content at {url}")
+                return
+                
+            # Limit response size
+            content_length = int(response.headers.get('Content-Length', 0))
+            if content_length > 10_000_000:  # 10MB limit
+                logging.warning(f"Skipping large content at {url}")
+                return
+                
+            response.raise_for_status()
+            
+        except requests.exceptions.SSLError:
+            logging.error(f"SSL verification failed for {url}")
+        except requests.exceptions.Timeout:
+            logging.error(f"Request timed out for {url}")
+        except requests.exceptions.TooManyRedirects:
+            logging.error(f"Too many redirects for {url}")
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Request failed for {url}: {e}")
+Thread Safety Improvements
+Python
+from threading import Lock
+from collections import deque
+import threading
+
+class WebCrawler:
+    def __init__(self, start_urls, max_threads=5, rate_limit=1, proxies=None, max_depth=2):
+        # ... existing init code ...
+        self.domain_locks = {}
+        self.domain_times = {}
+        self.domain_locks_lock = Lock()
+        
+    def get_domain_lock(self, url):
+        domain = urlparse(url).netloc
+        with self.domain_locks_lock:
+            if domain not in self.domain_locks:
+                self.domain_locks[domain] = Lock()
+                self.domain_times[domain] = 0
+            return self.domain_locks[domain]
+            
+    def search_for_ais(self, url, depth=0):
+        domain_lock = self.get_domain_lock(url)
+        with domain_lock:
+            current_time = time.time()
+            if current_time - self.domain_times.get(domain, 0) < self.rate_limit:
+                time.sleep(self.rate_limit)
+            self.domain_times[domain] = current_time
+            # ... rest of the method
+Data Sanitization and Validation
+Python
+import html
+import re
+
+class WebCrawler:
+    def sanitize_text(self, text):
+        # Remove potential XSS/injection content
+        text = html.escape(text)
+        # Remove control characters
+        text = ''.join(char for char in text if ord(char) >= 32)
+        return text
+        
+    def calculate_confidence(self, soup, keywords, patterns):
+        # Sanitize text before processing
+        text = self.sanitize_text(soup.get_text())
+        # ... rest of the method
+Secure Configuration Management
+Python
+import configparser
+from pathlib import Path
+
+class WebCrawler:
+    @staticmethod
+    def load_config():
+        config = configparser.ConfigParser()
+        config_file = Path('crawler_config.ini')
+        
+        if config_file.exists():
+            config.read(config_file)
+        else:
+            # Set default configuration
+            config['Crawler'] = {
+                'max_threads': '5',
+                'rate_limit': '1',
+                'max_depth': '2',
+                'request_timeout': '10',
+                'max_content_size': '10000000'
+            }
+            
+            # Save configuration securely
+            with open(config_file, 'w') as f:
+                config.write(f)
+            
+            # Set secure permissions
+            config_file.chmod(0o600)
+            
+        return config
+Additional Security Recommendations:
+
+Use Environment Variables for Sensitive Data
+Python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class WebCrawler:
+    def __init__(self, start_urls, max_threads=5, rate_limit=1, proxies=None, max_depth=2):
+        self.api_key = os.getenv('API_KEY')
+        self.proxy_auth = os.getenv('PROXY_AUTH')
+Implement Request Queuing with Backoff
+Python
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+class WebCrawler:
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    def make_request(self, url):
+        # ... make request with exponential backoff
+Add Logging for Security Events
+Python
+class WebCrawler:
+    def __init__(self, start_urls, max_threads=5, rate_limit=1, proxies=None, max_depth=2):
+        # Configure security logger
+        self.security_logger = logging.getLogger('security')
+        handler = logging.FileHandler('security.log')
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        self.security_logger.addHandler(handler)
